@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using WebApplication.Config;
 using WebApplication.Config.Db;
 using WebApplication.Controllers;
+using WebApplication.Util;
 using WebApplication.View;
 
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
@@ -12,7 +13,16 @@ builder.Services.AddSingleton<JwtSettings>();
 builder.Services.Configure<MongoDBSettings>(
     builder.Configuration.GetSection("MongoDBSettings"));
 
+
 builder.Services.AddSingleton<IDatabaseConfig, DatabaseConfig>();
+builder.Services.AddSingleton<TaskViews>(provider =>
+{
+
+    var config = provider.GetRequiredService<IDatabaseConfig>();
+    var logger = provider.GetRequiredService<ILogger<TaskViews>>();
+    return new TaskViews(config, builder.Configuration, logger); 
+}
+);
 
 builder.Services.AddSingleton<UserViews>(provider => 
 {
@@ -22,10 +32,12 @@ builder.Services.AddSingleton<UserViews>(provider =>
 });
 
 
+builder.Services.AddScoped<TaskController>();
 builder.Services.AddScoped<UserController>();
 builder.Services.AddScoped<LoginController>();
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(TaskMapper));
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddSwaggerGen(c =>
 {
