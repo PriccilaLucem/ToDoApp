@@ -24,6 +24,10 @@ namespace WebApplication.View
             _logger = logger;
         }    
 
+        public Task<UserModel> GetUserByEmail(string email)
+        {
+            return _usersCollection.Find(user => user.Email == email).FirstAsync();
+        }
         public async Task<List<UserModel>> GetUsers()
         {
             try

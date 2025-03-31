@@ -19,7 +19,7 @@ namespace WebApplication.Models
         public required string Email { get; set; }
 
         [BsonRequired]
-        [StringLength(100, MinimumLength = 6)]
+        [StringLength(300, MinimumLength = 6)]
         public required string  Password { get; set; }
 
         [BsonRequired]

@@ -1,18 +1,19 @@
 using Microsoft.AspNetCore.Diagnostics;
+using WebApplication.Config;
 using WebApplication.Config.Db;
 using WebApplication.Controllers;
 using WebApplication.View;
 
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
-// Add configuration validation first
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddSingleton<JwtSettings>();
+
 builder.Services.Configure<MongoDBSettings>(
     builder.Configuration.GetSection("MongoDBSettings"));
 
-// Register DatabaseConfig as IDatabaseConfig
 builder.Services.AddSingleton<IDatabaseConfig, DatabaseConfig>();
 
-// Register UserViews with its dependencies
 builder.Services.AddSingleton<UserViews>(provider => 
 {
     var config = provider.GetRequiredService<IDatabaseConfig>();
@@ -20,10 +21,10 @@ builder.Services.AddSingleton<UserViews>(provider =>
     return new UserViews(config, builder.Configuration, logger);
 });
 
-// Register controllers
-builder.Services.AddScoped<UserController>();
 
-// Add other services
+builder.Services.AddScoped<UserController>();
+builder.Services.AddScoped<LoginController>();
+
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddSwaggerGen(c =>
