@@ -83,10 +83,14 @@ namespace WebApplication.View
                 
             }
         }
-        public async Task<TaskModel> GetOneTaskView(string taskId)
+        public async Task<TaskModel?> GetOneTaskView(string taskId)
         {
             try
             {
+                if(ObjectId.TryParse(taskId, out _))
+                {
+                    return null;
+                }
                 return await _taskCollection.Find(item => item.Id == taskId).FirstAsync();
             }
             catch (Exception ex)

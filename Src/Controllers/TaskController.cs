@@ -4,7 +4,6 @@ using WebApplication.Src.Dto.task;
 using WebApplication.Src.Models.TaskModel;
 using WebApplication.View;
 using AutoMapper;
-using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 namespace WebApplication.Src.Controllers
@@ -102,7 +101,7 @@ namespace WebApplication.Src.Controllers
             _logger.LogInformation($"GET /api/v1/task/{id} - Fetching task by ID...");
             try
             {
-                TaskModel task = await _taskViews.GetOneTaskView(id);
+                TaskModel? task = await _taskViews.GetOneTaskView(id);
                 if (task == null)
                 {
                     _logger.LogWarning($"Task {id} not found.");

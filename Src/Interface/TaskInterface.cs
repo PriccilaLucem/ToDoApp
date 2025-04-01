@@ -11,6 +11,6 @@ namespace WebApplication.Src.Interface
 
         public Task<bool> DeleteTaskView(string taskId);
 
-        public Task<TaskModel> GetOneTaskView(string taskId);
+        public Task<TaskModel?> GetOneTaskView(string taskId);
     }
 }
