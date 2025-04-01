@@ -6,10 +6,12 @@ using System.Diagnostics;
 using WebApplication.Src.Dto.User;
 using AutoMapper;
 using WebApplication.Src.Dto.user;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication.Src.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/v1/users")]
     public class UserController(UserViews userViews, ILogger<UserController> logger, IMapper UserMapper) : ControllerBase
     {
@@ -41,6 +43,7 @@ namespace WebApplication.Src.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> PostUser([FromBody] CreateUserDTO userDTO)
         {
             _logger.LogInformation("POST /api/v1/users - Creating a new user...");

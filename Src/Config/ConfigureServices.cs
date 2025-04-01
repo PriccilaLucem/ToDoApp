@@ -3,6 +3,9 @@ using WebApplication.Src.Config.Db;
 using Serilog;
 using WebApplication.Src.Controllers;
 using WebApplication.Src.Util;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace WebApplication.Src.Config
 {
@@ -10,12 +13,14 @@ namespace WebApplication.Src.Config
     {
         public static void Configure(WebApplicationBuilder builder)
         {
+            var jwtSettings = new JwtSettings(builder.Configuration); 
             ConfigureJwt(builder);
             ConfigureMongoDB(builder);
             ConfigureDependencyInjection(builder);
             ConfigureSwagger(builder);
             ConfigureControllers(builder);
             ConfigureLogger(builder);
+            ConfigureAuthorization(builder, jwtSettings);
         }
         private static void ConfigureLogger(WebApplicationBuilder builder)
         {
@@ -77,6 +82,22 @@ namespace WebApplication.Src.Config
             builder.Services.AddControllers();
             builder.Services.AddAutoMapper(typeof(TaskMapper));
             builder.Services.AddAutoMapper(typeof(MappingProfile));
+        }
+
+        private static void ConfigureAuthorization(WebApplicationBuilder builder, JwtSettings jwtSettings)
+        {
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false, 
+                        ValidateAudience = false,
+                        ValidateLifetime = true, 
+                        ValidateIssuerSigningKey = true, 
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+                    };
+                });
         }
     }
 }

@@ -5,9 +5,11 @@ using WebApplication.Src.Models.TaskModel;
 using WebApplication.View;
 using AutoMapper;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApplication.Src.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("/api/v1/task")]
     public class TaskController : ControllerBase

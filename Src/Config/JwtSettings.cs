@@ -1,15 +1,11 @@
 
 namespace WebApplication.Src.Config
 {
-    public class JwtSettings
+    public class JwtSettings(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration = configuration;
 
-        public JwtSettings(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
+                
         public string SecretKey => GetSecretKey();
 
         private string GetSecretKey()
@@ -24,7 +20,7 @@ namespace WebApplication.Src.Config
                     "Set it in appsettings.json or environment variables.");
             }
 
-            // For development only - remove in production
+            //TODO remove it later
             if (key.Length < 32)
             {
                 throw new InvalidOperationException(
