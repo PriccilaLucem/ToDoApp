@@ -1,4 +1,4 @@
-using WebApplication.View;
+using WebApplication.Src.View;
 using WebApplication.Src.Config.Db;
 using Serilog;
 using WebApplication.Src.Controllers;

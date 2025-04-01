@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApplication.Src.Config;
 using WebApplication.Src.Dto.task;
 using WebApplication.Src.Models.TaskModel;
-using WebApplication.View;
+using WebApplication.Src.View;
 using AutoMapper;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;

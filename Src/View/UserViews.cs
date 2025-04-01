@@ -4,9 +4,9 @@ using WebApplication.Src.Config.Db;
 using WebApplication.Src.Models;
 using WebApplication.Src.Interface;
 
-namespace WebApplication.View
+namespace WebApplication.Src.View
 {
-    public class UserViews : IUserInterface
+    public class UserViews : IUserView
     {
         private readonly IMongoCollection<UserModel> _usersCollection;
         private readonly ILogger<UserViews> _logger;
@@ -96,11 +96,6 @@ namespace WebApplication.View
         {
             try
             {
-                if (user == null || string.IsNullOrEmpty(user.Id))
-                {
-                    throw new ArgumentException("Invalid user data");
-                }
-
                 var filter = Builders<UserModel>.Filter.Eq(u => u.Id, user.Id);
                 var options = new FindOneAndReplaceOptions<UserModel>
                 {

@@ -1,22 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApplication.Src.Models;
-using WebApplication.View;
+using WebApplication.Src.View;
 using MongoDB.Driver;
 using System.Diagnostics;
 using WebApplication.Src.Dto.User;
 using AutoMapper;
 using WebApplication.Src.Dto.user;
 using Microsoft.AspNetCore.Authorization;
+using WebApplication.Src.Interface;
 
 namespace WebApplication.Src.Controllers
 {
     [ApiController]
     [Authorize]
     [Route("api/v1/users")]
-    public class UserController(UserViews userViews, ILogger<UserController> logger, IMapper UserMapper) : ControllerBase
+    public class UserController(IUserView userViews, ILogger<UserController> logger, IMapper UserMapper) : ControllerBase
     {
         private readonly IMapper _mapper = UserMapper;
-        private readonly UserViews _userViews = userViews;
+        private readonly IUserView _userViews = userViews;
         private readonly ILogger<UserController> _logger = logger;
 
         [HttpGet]
@@ -83,7 +84,7 @@ namespace WebApplication.Src.Controllers
                 _logger.LogWarning($"Duplicate user detected: {ex.Message}");
                 return Conflict(new
                 {
-                    message = "Usuário já existe",
+                    message = "User already exists",
                     field = ex.WriteError.Message.Contains("email") ? "email" : "username"
                 });
             }
@@ -92,7 +93,7 @@ namespace WebApplication.Src.Controllers
                 _logger.LogError(ex, "Error creating user.");
                 return StatusCode(500, new
                 {
-                    message = "Ocorreu um erro ao processar sua requisição",
+                    message = "Error handling post User",
                     requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
                 });
             }

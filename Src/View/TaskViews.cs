@@ -4,7 +4,7 @@ using WebApplication.Src.Config.Db;
 using WebApplication.Src.Interface;
 using WebApplication.Src.Models.TaskModel;
 
-namespace WebApplication.View
+namespace WebApplication.Src.View
 {
     public class TaskViews: TaskInterface
     {
