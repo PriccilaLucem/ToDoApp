@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using WebApplication.WebApplication.Tests.Model;
 using WebApplication.WebApplication.Tests.Util;
 
-namespace WebApplication.Tests.View
+namespace WebApplication.WebApplication.Tests.View
 {
     public class UserViewsTests : IDisposable
     {
