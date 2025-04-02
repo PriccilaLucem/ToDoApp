@@ -3,22 +3,22 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using WebApplication.Src.Config;
-using WebApplication.Src.Dto.user;
 using WebApplication.Src.Dto.User;
 using WebApplication.Src.Interface;
 using WebApplication.Src.Models;
 using Xunit;
+using Microsoft.AspNetCore.Hosting;
+using System.Net.Http.Json;
+using WebApplication.WebApplication.Tests.Util;
+using Xunit.Abstractions;
 
 namespace WebApplication.Tests.Integration
 {
@@ -33,50 +33,60 @@ namespace WebApplication.Tests.Integration
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         private readonly TestAuthSettings _testAuthSettings = new();
+        private readonly List<Action<IServiceCollection>> _serviceConfigurations = new();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureServices(services =>
             {
+                // Adicionar configurações de mock de serviço
                 var userViewMock = new Mock<IUserView>();
                 userViewMock.Setup(x => x.CreateUsers(It.IsAny<UserModel>()))
-                          .ReturnsAsync("generated-id");
-                
+                            .ReturnsAsync("generated-id");
                 services.AddScoped<IUserView>(_ => userViewMock.Object);
                 services.AddSingleton(_testAuthSettings);
+
+                // Aplica todas as configurações adicionais fornecidas
+                foreach (var config in _serviceConfigurations)
+                {
+                    config(services);
+                }
             });
         }
 
         public HttpClient GetAuthenticatedClient(
-            string userId = "test-user", 
-            string[] roles = null, 
+            string userId = "test-user",
             string email = "test@example.com")
         {
             var client = CreateClient();
-            
+
             var token = JwtTokenHelper.GenerateTestToken(
                 _testAuthSettings.SecretKey,
                 _testAuthSettings.Issuer,
                 _testAuthSettings.Audience,
                 userId,
-                roles ?? Array.Empty<string>(),
                 email);
 
-            client.DefaultRequestHeaders.Authorization = 
+            client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
 
             return client;
+        }
+
+        // Método para adicionar configurações de serviços extras
+        public void AddServiceConfiguration(Action<IServiceCollection> configuration)
+        {
+            _serviceConfigurations.Add(configuration);
         }
     }
 
     public static class JwtTokenHelper
     {
         public static string GenerateTestToken(
-            string secretKey, 
-            string issuer, 
-            string audience, 
+            string secretKey,
+            string issuer,
+            string audience,
             string userId,
-            string[] roles,
             string email)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -90,14 +100,7 @@ namespace WebApplication.Tests.Integration
                 new Claim(ClaimTypes.NameIdentifier, userId)
             };
 
-            if (roles != null)
-            {
-                foreach (var role in roles)
-                {
-                    claims = claims.Append(new Claim(ClaimTypes.Role, role)).ToArray();
-                }
-            }
-
+            
             var token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
@@ -109,47 +112,107 @@ namespace WebApplication.Tests.Integration
         }
     }
 
-    public class UserControllerIntegrationTest : IClassFixture<CustomWebApplicationFactory>
+    public class UserControllerIntegrationTest : IClassFixture<CustomWebApplicationFactory>, IDisposable
     {
         private readonly CustomWebApplicationFactory _factory;
         private readonly HttpClient _client;
+        private readonly TestLogger _logger;
 
-        public UserControllerIntegrationTest(CustomWebApplicationFactory factory)
+        public UserControllerIntegrationTest(ITestOutputHelper output)
         {
-            _factory = factory;
+            _logger = new TestLogger(output);
+            _factory = new CustomWebApplicationFactory();
             _client = _factory.GetAuthenticatedClient();
+            _logger.LogInfo("Test initialized");
         }
 
         [Fact]
         public async Task PostUser_ReturnsCreated_WithValidToken()
         {
-            var userDto = new CreateUserDTO
+            try
             {
-                Name = "Test User",
-                Email = $"test-{Guid.NewGuid()}@example.com",
-                BirthDate = DateTime.UtcNow,
-                Password = "ValidPassword123!"
-            };
+                _logger.LogInfo("Starting PostUser_ReturnsCreated_WithValidToken test");
+                
+                var userDto = new CreateUserDTO
+                {
+                    Name = "Test User",
+                    Email = $"test-{Guid.NewGuid()}@example.com",
+                    BirthDate = DateTime.UtcNow,
+                    Password = "ValidPassword123!"
+                };
 
-            var response = await _client.PostAsJsonAsync("/api/v1/users", userDto);
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            Assert.NotNull(response.Headers.Location);
+                _logger.LogInfo($"Creating user with email: {userDto.Email}");
+                
+                var response = await _client.PostAsJsonAsync("/api/v1/users", userDto);
+                
+                _logger.LogInfo($"Received response status: {response.StatusCode}");
+                
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.NotNull(response.Headers.Location);
+                
+                _logger.LogInfo("Test completed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Test failed", ex);
+                throw;
+            }
         }
 
         [Fact]
         public async Task GetUserById_ReturnsNotFound_WhenUserDoesNotExist()
         {
-            var client = _factory.GetAuthenticatedClient();
-
-            var response = await client.GetAsync($"/api/v1/users/nonexistent-{Guid.NewGuid()}");
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            try
+            {
+                _logger.LogInfo("Starting GetUserById_ReturnsNotFound_WhenUserDoesNotExist test");
+                
+                var client = _factory.GetAuthenticatedClient();
+                var userId = $"nonexistent-{Guid.NewGuid()}";
+                
+                _logger.LogInfo($"Testing with non-existent user ID: {userId}");
+                
+                var response = await client.GetAsync($"/api/v1/users/{userId}");
+                
+                _logger.LogInfo($"Received response status: {response.StatusCode}");
+                
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+                
+                _logger.LogInfo("Test completed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Test failed", ex);
+                throw;
+            }
         }
+
         [Fact]
         public async Task GetUsers_ReturnsUnauthorized_WithoutToken()
         {
-            var client = _factory.CreateClient();
-            var response = await client.GetAsync("/api/v1/users");
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+            try
+            {
+                _logger.LogInfo("Starting GetUsers_ReturnsUnauthorized_WithoutToken test");
+                
+                var client = _factory.CreateClient();
+                var response = await client.GetAsync("/api/v1/users");
+                
+                _logger.LogInfo($"Received response status: {response.StatusCode}");
+                
+                Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+                
+                _logger.LogInfo("Test completed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Test failed", ex);
+                throw;
+            }
+        }
+
+        public void Dispose()
+        {
+            _logger.LogInfo("Test cleanup");
+            _client.Dispose();
         }
     }
-}
+    }

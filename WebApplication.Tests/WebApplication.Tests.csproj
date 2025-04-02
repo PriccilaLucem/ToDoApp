@@ -32,5 +32,9 @@
   <ItemGroup>
     <ProjectReference Include="..\WebApplication.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Update="logs\test\*.log">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
