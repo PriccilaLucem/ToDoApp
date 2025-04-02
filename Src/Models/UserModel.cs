@@ -43,13 +43,5 @@ namespace WebApplication.Src.Models
         public List<string> Tags { get; set; } = new List<string>();
         [BsonElement("status")]
         public bool? Status { get; set; } = true;
-
-        public static ValidationResult ValidateTimestamps(DateTime updatedAt, ValidationContext context)
-        {
-            var model = (UserModel)context.ObjectInstance;
-            return updatedAt < model.CreatedAt 
-                ? new ValidationResult("UpdatedAt cannot be before CreatedAt") 
-                : ValidationResult.Success;
-        }
     }
 }

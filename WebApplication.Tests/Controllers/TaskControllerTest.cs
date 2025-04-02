@@ -34,7 +34,6 @@ namespace WebApplication.WebApplication.Tests.Controllers
             _mockLogger = new Mock<ILogger<TaskController>>();
             _mockMapper = new Mock<IMapper>();
             
-            // Initialize controller with mocked dependencies
             _controller = new TaskController(
                 _mockLogger.Object, 
                 _mockTaskViews.Object, 

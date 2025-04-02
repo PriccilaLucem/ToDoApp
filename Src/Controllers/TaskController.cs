@@ -6,6 +6,7 @@ using WebApplication.Src.View;
 using AutoMapper;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
+using WebApplication.Src.Interface;
 
 namespace WebApplication.Src.Controllers
 {
@@ -15,10 +16,10 @@ namespace WebApplication.Src.Controllers
     public class TaskController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly TaskViews _taskViews;
+        private readonly ITaskViews _taskViews;
         private readonly ILogger<TaskController> _logger;
 
-        public TaskController(ILogger<TaskController> logger, TaskViews taskViews, IMapper taskMapper)
+        public TaskController(ILogger<TaskController> logger, ITaskViews taskViews, IMapper taskMapper)
         {
             _logger = logger;
             _taskViews = taskViews;
@@ -29,7 +30,7 @@ namespace WebApplication.Src.Controllers
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<ErrorDetails>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(IEnumerable<ErrorDetails>))]
-        public async Task<IActionResult> Post([FromBody] TaskDTO taskDto)
+        public async Task<IActionResult> PostTask([FromBody] TaskDTO taskDto)
         {
             _logger.LogInformation("POST /api/v1/task - Creating a new task...");
             try
@@ -44,7 +45,6 @@ namespace WebApplication.Src.Controllers
                             .Select(e => e.ErrorMessage)
                     });
                 }
-
                 TaskModel task = _mapper.Map<TaskModel>(taskDto);
                 string taskId = await _taskViews.CreateTaskView(task);
                 _logger.LogInformation($"Task created successfully with ID: {taskId}");

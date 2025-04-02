@@ -6,7 +6,7 @@ using WebApplication.Src.Models.TaskModel;
 
 namespace WebApplication.Src.View
 {
-    public class TaskViews: TaskInterface
+    public class TaskViews: ITaskViews
     {
         private readonly IMongoCollection<TaskModel> _taskCollection;
         private readonly ILogger<TaskViews> _logger;

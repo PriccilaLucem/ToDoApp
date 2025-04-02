@@ -3,7 +3,7 @@ using WebApplication.Src.Models.TaskModel;
 
 namespace WebApplication.Src.Interface
 {
-    public interface TaskInterface
+    public interface ITaskViews
     {
         public Task<string> CreateTaskView(TaskModel task);
         public Task<TaskModel> UpdateTaskView(TaskModel task);

@@ -6,6 +6,7 @@ using WebApplication.Src.Util;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using WebApplication.Src.Interface;
 
 namespace WebApplication.Src.Config
 {
@@ -44,6 +45,8 @@ namespace WebApplication.Src.Config
 
         private static void ConfigureDependencyInjection(WebApplicationBuilder builder)
         {
+            builder.Services.AddScoped<ITaskViews, TaskViews>();
+
             builder.Services.AddSingleton<TaskViews>(provider =>
             {
                 var config = provider.GetRequiredService<IDatabaseConfig>();

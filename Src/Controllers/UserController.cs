@@ -99,28 +99,28 @@ namespace WebApplication.Src.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
-        {
-            _logger.LogInformation($"DELETE /api/v1/users/{id} - Deleting user...");
-            try
-            {
-                bool isDeleted = await _userViews.DeleteUsers(id);
-                if (isDeleted)
-                {
-                    _logger.LogInformation($"User {id} deleted successfully.");
-                    return NoContent();
-                }
+        // [HttpDelete("{id}")]
+        // public async Task<IActionResult> DeleteUser(string id)
+        // {
+        //     _logger.LogInformation($"DELETE /api/v1/users/{id} - Deleting user...");
+        //     try
+        //     {
+        //         bool isDeleted = await _userViews.DeleteUsers(id);
+        //         if (isDeleted)
+        //         {
+        //             _logger.LogInformation($"User {id} deleted successfully.");
+        //             return NoContent();
+        //         }
 
-                _logger.LogWarning($"User {id} not found.");
-                return NotFound(new { error = "User Not Found" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error deleting user {id}");
-                return StatusCode(500, new { message = "Internal Server Error" });
-            }
-        }
+        //         _logger.LogWarning($"User {id} not found.");
+        //         return NotFound(new { error = "User Not Found" });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, $"Error deleting user {id}");
+        //         return StatusCode(500, new { message = "Internal Server Error" });
+        //     }
+        // }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UpdatedUserDTO userToUpdate)
